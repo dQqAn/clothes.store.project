@@ -82,7 +82,7 @@ void showCart(list<list<string>> myList)
 
 		for (single_it = single_list_pointer.begin(); single_it != single_list_pointer.end(); single_it++)
 		{
-			//cout << *single_it << " x " << endl;
+			cout << *single_it << endl;
 		}
 	}		
 }
@@ -96,6 +96,7 @@ int main()
 	int action = 0;
 
 	Manager manager;	
+	Order order;
 
 	ifstream readUsers("users.txt");
 	ofstream writeUsers;
@@ -105,19 +106,33 @@ int main()
 	srand((unsigned)time(0)); //random için
 
 	list<list<string>> cartItems;
+		
+	/*for (size_t i = 0; i < 10; i++)
+	{
+		order.setOrder();
+		remove("orders.txt");
+		rename("tempFile2.txt", "orders.txt");
+		remove("courier.txt");
+		rename("tempF2.txt", "courier.txt");
+				
+	}
+
+	for (size_t i = 0; i < 10; i++)
+	{
+		order.startSimulation();
+		remove("orders.txt");
+		rename("tempFile3.txt", "orders.txt");
+		remove("courier.txt");
+		rename("tempF3.txt", "courier.txt");
+		
+	}
 	
-	Order order;
 	order.setOrder();
 	remove("orders.txt");
 	rename("tempFile2.txt", "orders.txt");
 	remove("courier.txt");
-	rename("tempF2.txt", "courier.txt");
+	rename("tempF2.txt", "courier.txt");*/
 	
-	/*order.startSimulation();
-	remove("orders.txt");
-	rename("tempFile3.txt", "orders.txt");
-	remove("courier.txt");
-	rename("tempF3.txt", "courier.txt");*/
 
 Menu:
 
@@ -243,13 +258,14 @@ Menu:
 
 						case 4:
 
+							//Kullanýcýya indirim kodu tanýmlamasý
 							manager.sendCouponToUser();
 							goto MenuManager;
 
-						case 5: //TODO: Yapýlan sipariþlerin faturalarýnýn görüntülemesi
-
+						case 5: 
 							//Yapýlan sipariþlerin faturalarýnýn görüntülemesi
-							break;
+							manager.showBills();
+							goto MenuManager;
 
 						case 6:
 
@@ -378,10 +394,6 @@ Menu:
 								readUsers.close();								
 								showCart(cartItems);															
 								order.buyItems(&user, &cartItems, &member);
-								remove("orders.txt");
-								rename("tempFile.txt", "orders.txt");
-								remove("courier.txt");
-								rename("tempF.txt", "courier.txt");
 								readUsers.open("users.txt");
 								goto MenuMember;
 
@@ -392,10 +404,9 @@ Menu:
 							}
 
 						case 2:
-							//TODO: Sipariþ Takip
 							//Sipariþ Takip
-
-							break;
+							member.showOrders(&user);
+							goto MenuMember;
 
 						case 3:
 

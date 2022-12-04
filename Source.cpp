@@ -6,6 +6,7 @@
 #include "Header.h"
 #include <ctime>
 #include <time.h>
+#include <conio.h>
 using namespace std;
 
 #pragma region User
@@ -234,6 +235,19 @@ void Manager::readComments() {
 	cout << endl;
 }
 
+void Manager::showBills() {
+	ifstream readBill("bills.txt");
+	string line;
+	readBill.close();
+	readBill.open("bills.txt");
+
+	while (getline(readBill, line)) {
+		cout << line << endl;
+		
+	}
+	readBill.close();
+}
+
 #pragma endregion
 
 #pragma region Member
@@ -406,6 +420,21 @@ MenuComment:
 		goto MenuComment;
 	}
 	readComments.open("comments.txt");
+}
+
+void Member::showOrders(User* user) {
+	ifstream readOrder("orders.txt");
+	string line;
+	readOrder.close();
+	readOrder.open("orders.txt");
+
+	while (getline(readOrder, line)) {
+		string userNo = line.substr(line.find("user:")+6, line.find("price")- line.find("user")-7);
+		if (userNo==user->getMail()) {
+			cout << line << endl;
+		}
+	}
+	readOrder.close();
 }
 
 void Member::changePassword(User *user) {
@@ -756,7 +785,8 @@ void Order::startSimulation() {
 			tempCourierNo = lineOrder.substr(lineOrder.find("courierNo:")+11, 
 				lineOrder.find("location:")- lineOrder.find("courierNo:")-12);
 
-			lineOrder = part1 + "offline " + part2;			
+			lineOrder = part1 + "offline " + part2;		
+			_getch();
 		}
 		tempFile.open("tempFile3.txt", ios::out | ios::app | ios::in | ios::binary);
 		tempFile << lineOrder+"\n";
@@ -785,6 +815,7 @@ void Order::startSimulation() {
 			string part1 = lineCourier.substr(0,lineCourier.find("status:")+8);
 			string part2= lineCourier.substr(lineCourier.find("location:"), lineCourier.length());
 			lineCourier = part1 + "ok " + part2;
+			_getch();
 		}
 		tempF.open("tempF3.txt", ios::out | ios::app | ios::in | ios::binary);
 		tempF << lineCourier + "\n";
@@ -826,54 +857,73 @@ void Order::setOrder() {
 
 	string lineOrder, lineCourier;
 	
-	while (getline(readOrder, lineOrder)) {
-		//cout << lineOrder << endl;
 
-		//string Ostatus = lineOrder.substr(lineOrder.find("status:")+8,lineOrder.find("courierNo")- lineOrder.find("status")-9);
-		string Ostatus = lineOrder.substr(lineOrder.find("status:") + 8, lineOrder.length());
+	//ayrtýþtýr
+	string tempCno, tempClocation;
+	int buffer = 0;
+	while (getline(readCourier, lineCourier)) {
+		//cout << lineCourier << endl;
+		string Cno = lineCourier.substr(lineCourier.find("no:") + 4, lineCourier.find("name") - lineCourier.find("no") - 5);
+		string Cstatus = lineCourier.substr(lineCourier.find("status:") + 8, lineCourier.find("location") - lineCourier.find("status") - 9);
+		string Clocation = lineCourier.substr(lineCourier.find("location:") + 10, lineCourier.length());
+		string Cname = lineCourier.substr(lineCourier.find("name:") + 6, lineCourier.find("status") - lineCourier.find("name") - 7);
+		//cout << "X" + Cno + "X" + Cstatus + "X" + Clocation + "X" + Cname + "X"<<endl;
 
-		string OAddress = lineOrder.substr(lineOrder.find("address:") + 9, lineOrder.find("status:") - lineOrder.find("address:") - 10);
-		
-		//ayrtýþtýr
-		while (getline(readCourier, lineCourier)) {
-			//cout << lineCourier << endl;
-			string Cno = lineCourier.substr(lineCourier.find("no:") + 4, lineCourier.find("name") - lineCourier.find("no") - 5);
-			string Cstatus = lineCourier.substr(lineCourier.find("status:") + 8, lineCourier.find("location") - lineCourier.find("status") - 9);
-			string Clocation = lineCourier.substr(lineCourier.find("location:") + 10, lineCourier.length());
-			string Cname = lineCourier.substr(lineCourier.find("name:") + 6, lineCourier.find("status") - lineCourier.find("name") - 7);
-			//cout << "X" + Cno + "X" + Cstatus + "X" + Clocation + "X" + Cname + "X"<<endl;
+		if (Cstatus == "ok" && buffer==0) {
+			Cstatus = "busy";
+			/*readCourier.close();
+			readCourier.open("courier.txt");
+			break;*/
+			tempCno = Cno;
+			tempClocation = Clocation;
+			buffer = 1;
+			_getch();
+		}
 
-			if (Cstatus == "ok" && Ostatus == "offline") {
+		tempF.open("tempF2.txt", ios::out | ios::app | ios::in | ios::binary);
+		tempF << "no: " + Cno + " name: " + Cname + " status: " + Cstatus + " location: " + Clocation + "\n";
+		tempF.close();
 
+	}
+	readCourier.close();
+	readCourier.open("courier.txt");
+
+	if (buffer==1) {
+		buffer = 0;
+		while (getline(readOrder, lineOrder)) {
+			//cout << lineOrder << endl;
+
+			//string Ostatus = lineOrder.substr(lineOrder.find("status:")+8,lineOrder.find("courierNo")- lineOrder.find("status")-9);
+			string Ostatus = lineOrder.substr(lineOrder.find("status:") + 8, lineOrder.length());
+
+			string OAddress = lineOrder.substr(lineOrder.find("address:") + 9, lineOrder.find("status:") - lineOrder.find("address:") - 10);
+
+			if (Ostatus == "offline" && buffer == 0) {
+				//cout << Ostatus << endl;
 				string part1 = lineOrder.substr(0, lineOrder.find("status:") - 1);
-				string part2 = part1 + " status: online" + " courierNo: " + Cno + " location: " + Clocation +
+				string part2 = part1 + " status: online" + " courierNo: " + tempCno + " location: " + tempClocation +
 					" orderBegin: " + tempTime.getCurrentHour() + " orderDelivery: " + tempTime.getDeliveryTime(OAddress)
 					+ " courierStatus: busy";
 
 				lineOrder = part2;
-				Cstatus = "busy";
-
-				readCourier.close();
-				readCourier.open("courier.txt");
-				break;
-
+				buffer = 1;
+				_getch();
 			}
-			tempF.open("tempF2.txt", ios::out | ios::app | ios::in | ios::binary);
-			tempF << "no: " + Cno + " name: " + Cname + " status: " + Cstatus + " location: " + Clocation + "\n";
-			tempF.close();
 
+			tempFile.open("tempFile2.txt", ios::out | ios::app | ios::in | ios::binary);
+			tempFile << lineOrder + "\n";
+			tempFile.close();
+			//break;
 		}
-		readCourier.close();
-		readCourier.open("courier.txt");
-
-		tempFile.open("tempFile2.txt", ios::out | ios::app | ios::in | ios::binary);
-		tempFile << lineOrder + "\n";
-		tempFile.close();
-		//break;
 	}
-	
-	
-
+	else {
+		while (getline(readOrder, lineOrder)) {
+			tempFile.open("tempFile2.txt", ios::out | ios::app | ios::in | ios::binary);
+			tempFile << lineOrder + "\n";
+			tempFile.close();
+		}
+	}
+		
 	tempFile.close();
 	readOrder.close();
 	readCourier.close();
@@ -933,15 +983,27 @@ void Order::buyItems(User* user, list<list<string>>* items, Member* member) {
 			+ " price: " + to_string(tempPrice) + " address: " + member->getAddress() + " status: " + "offline" + "\n";
 		writeOrders.close();
 		writeOrders.open("orders.txt", ios::out | ios::app | ios::in | ios::binary);
+		
+		ofstream writeBill;		
+		writeBill.open("bills.txt", ios::out | ios::app | ios::in | ios::binary);
+		writeBill << "";
+		writeBill.close();
+		writeBill.open("bills.txt", ios::out | ios::app | ios::in | ios::binary);
+		string orderTime = orderBegin.getCurrentHour();
+		writeBill << "name: "+member->getName() + " orderTime: "+ orderTime + 
+			" orderNo: " + to_string(counter) + " price: " + to_string(tempPrice) + "\n";
+		writeBill.close();
+		cout<< "name: " + member->getName() + " orderTime: " + orderTime +
+			" orderNo: " + to_string(counter) + " price: " + to_string(tempPrice) + "\n";
 		counter = 1;
 	}
 	readOrders.close();
-	readOrders.open("orders.txt");
+	//readOrders.open("orders.txt");
 	writeOrders.close();
-	writeOrders.open("orders.txt", ios::out | ios::app | ios::in | ios::binary);
+	//writeOrders.open("orders.txt", ios::out | ios::app | ios::in | ios::binary);
 	items->clear();
 
-	setOrder();
+	//setOrder();
 }
 
 #pragma endregion

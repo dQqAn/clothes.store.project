@@ -74,7 +74,7 @@ class Member:public User{
 public:
 	Member(string mail, string password, string role, string birthday, string tel, string name, string adress, string coupon);
 	void showProducts(string pName);
-	void showOrders();
+	void showOrders(User *user);
 	void writeComment(string mail);
 	void changePassword(User *user);
 	void addItemToCart(list<list<string>> *items);
