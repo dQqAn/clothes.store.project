@@ -106,34 +106,7 @@ int main()
 	srand((unsigned)time(0)); //random için
 
 	list<list<string>> cartItems;
-		
-	/*for (size_t i = 0; i < 10; i++)
-	{
-		order.setOrder();
-		remove("orders.txt");
-		rename("tempFile2.txt", "orders.txt");
-		remove("courier.txt");
-		rename("tempF2.txt", "courier.txt");
-				
-	}
-
-	for (size_t i = 0; i < 10; i++)
-	{
-		order.startSimulation();
-		remove("orders.txt");
-		rename("tempFile3.txt", "orders.txt");
-		remove("courier.txt");
-		rename("tempF3.txt", "courier.txt");
-		
-	}
-	
-	order.setOrder();
-	remove("orders.txt");
-	rename("tempFile2.txt", "orders.txt");
-	remove("courier.txt");
-	rename("tempF2.txt", "courier.txt");*/
-	
-
+					
 Menu:
 
 	cout << "1) Sign in: " << endl;
@@ -323,6 +296,9 @@ Menu:
 						Member member(mail, password, "member", birthday, tel, name, address, coupon);
 						readUsers.close();
 						readUsers.open("users.txt");
+						int counter = 0;
+						string CounterLine;
+						ifstream readOrder("orders.txt");
 
 					MenuMember:
 
@@ -405,7 +381,20 @@ Menu:
 
 						case 2:
 							//Sipariþ Takip
-							member.showOrders(&user);
+							member.showOrders(&user);							
+							readOrder.close();
+							readOrder.open("orders.txt");
+							
+							for (int i = 0; getline(readOrder, CounterLine); i++)
+							{
+								++counter;
+							}
+							readOrder.close();
+
+							for (size_t i = 0; i < counter; i++)
+							{
+								order.startSimulation();
+							}							
 							goto MenuMember;
 
 						case 3:

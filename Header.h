@@ -60,7 +60,9 @@ public:
 	void setHour(string);
 	void setMinute(string);
 
-	string calculateTime(string first, string second);
+	string calculateTime(string time, string min);
+
+	string newDeliveryTime(string time, string address);
 	
 private:
 	string hour;
@@ -151,7 +153,7 @@ class Order {
 public:
 	Order();
 	void buyItems(User* user, list<list<string>>* items, Member* member);
-	void setOrder();
+	void setOrder(string deliveryTimeBegin);
 
 	void startSimulation();
 private:

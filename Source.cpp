@@ -617,12 +617,12 @@ string MyTimes::getCurrentHour() {
 	return to_string(newtime.tm_hour) + ":" + to_string(newtime.tm_min);
 }
 
-string MyTimes::calculateTime(string first, string second){
-	int firstHour= stoi(first.substr(0, first.find(":")));	
-	int firstMin = stoi(first.substr(first.find(":")+1, first.length()));
+string MyTimes::calculateTime(string time, string min){
+	int firstHour= stoi(time.substr(0, time.find(":")));
+	int firstMin = stoi(time.substr(time.find(":")+1, time.length()));
 	//cout << firstHour <<" " << firstMin << endl;
 
-	int secondMin = stoi(second);
+	int secondMin = stoi(min);
 	int tempFirstMin = (secondMin + firstMin) % 60;
 	
 	while (secondMin + firstMin >= 60) {
@@ -640,6 +640,28 @@ string MyTimes::calculateTime(string first, string second){
 	string tempVar = to_string(firstHour) + ":" + to_string(tempFirstMin);
 	//cout << tempVar << endl;
 	return tempVar;
+}
+
+string MyTimes::newDeliveryTime(string time, string address) {
+	//cout << "TT: " << time << endl;
+	ifstream readTimes("times.txt");
+	readTimes.close();
+	readTimes.open("times.txt");
+	string line;
+	string tempTime;
+	while (getline(readTimes, line)) {
+		string tempAddres = line.substr(line.find("location:") + 10, line.find("time") - line.find("location") - 11);
+		if (address == tempAddres) {
+			tempTime = line.substr(line.find("time:") + 6, line.length());
+			//cout << tempTime<<endl;
+		}
+
+	}
+	readTimes.close();
+	readTimes.open("times.txt");
+	string newTime=calculateTime(time, tempTime);
+
+	return newTime;
 }
 
 string MyTimes::getDeliveryTime(string OAddress) {
@@ -740,8 +762,8 @@ void Order::startSimulation() {
 	orderDelivery.setHour(to_string(tHour));
 	orderDelivery.setMinute(to_string(tMin));
 
-	//en küçük saatin orderNo'su alýndý
-	string tempOrderNo;
+	//en küçük saatin orderNo'su ve Address'i alýndý
+	string tempOrderNo, tempAddress, tempDeliveryTime;
 	while (getline(readOrder, lineOrder)) {
 		
 		string status = lineOrder.substr(lineOrder.find("status:") + 8,
@@ -754,8 +776,10 @@ void Order::startSimulation() {
 			//cout << tempTime << endl;
 			//cout << tempMinTime << endl;
 			if (tempTime == tempMinTime) {
+				tempAddress = lineOrder.substr(lineOrder.find("address:")+9, lineOrder.find("status")- lineOrder.find("address") -10);
 				tempOrderNo = lineOrder.substr(lineOrder.find("orderNo:")+9, 
 					lineOrder.find("user")- lineOrder.find("orderNo")-10);
+				tempDeliveryTime = tempMinTime;
 				//cout << lineOrder << endl;
 				//cout << tempOrderNo << endl;
 			}
@@ -768,6 +792,16 @@ void Order::startSimulation() {
 	tempFile.open("tempFile3.txt", ios::out | ios::app | ios::in | ios::binary);
 	tempFile << "";
 	tempFile.close();
+
+	//Courier'ýn yeni delivery time'ý
+	string newDeliveryTime;
+	if (!tempDeliveryTime.empty()) {
+		newDeliveryTime = orderDelivery.newDeliveryTime(tempDeliveryTime, tempAddress);
+	}
+	else {
+		newDeliveryTime = "ok";
+	}
+		
 	//önce bitecek olan orderNo alýndýktan sonra status'u offline olur,	
 	string tempCourierNo;
 	while (getline(readOrder, lineOrder)) {
@@ -781,26 +815,26 @@ void Order::startSimulation() {
 		if (status == "online" && tempOrderNo == minOrderNo) {
 
 			string part1 = lineOrder.substr(0, lineOrder.find("status:") + 8);
-			string part2= lineOrder.substr(lineOrder.find("courierNo:"), lineOrder.length());
-			tempCourierNo = lineOrder.substr(lineOrder.find("courierNo:")+11, 
-				lineOrder.find("location:")- lineOrder.find("courierNo:")-12);
+			string part2 = lineOrder.substr(lineOrder.find("courierNo:"), lineOrder.length());
+			tempCourierNo = lineOrder.substr(lineOrder.find("courierNo:") + 11,
+				lineOrder.find("location:") - lineOrder.find("courierNo:") - 12);
 
-			lineOrder = part1 + "offline " + part2;		
+			lineOrder = part1 + "offline " + part2;
 			_getch();
 		}
 		tempFile.open("tempFile3.txt", ios::out | ios::app | ios::in | ios::binary);
-		tempFile << lineOrder+"\n";
+		tempFile << lineOrder + "\n";
 		tempFile.close();
 	}
 
 	readOrder.close();
 	readOrder.open("orders.txt");
-	
+
 	//courier status'u ok olur 
 	ifstream readCourier("courier.txt");
-	 
+
 	readCourier.close();
-	readCourier.open("courier.txt"); 
+	readCourier.open("courier.txt");
 
 	ofstream tempF("tempF3.txt");
 	tempF.open("tempF3.txt", ios::out | ios::app | ios::in | ios::binary);
@@ -808,13 +842,14 @@ void Order::startSimulation() {
 	tempF.close();
 	string lineCourier;
 	while (getline(readCourier, lineCourier)) {
-		string tempCNo = lineCourier.substr(lineCourier.find("no:")+4,
-			lineCourier.find("name")- lineCourier.find("no")-5);
+		string tempCNo = lineCourier.substr(lineCourier.find("no:") + 4,
+			lineCourier.find("name") - lineCourier.find("no") - 5);
 
-		if (tempCNo== tempCourierNo) {
-			string part1 = lineCourier.substr(0,lineCourier.find("status:")+8);
-			string part2= lineCourier.substr(lineCourier.find("location:"), lineCourier.length());
-			lineCourier = part1 + "ok " + part2;
+		if (tempCNo == tempCourierNo) {
+			string part1 = lineCourier.substr(0, lineCourier.find("status:") + 8);
+			//string part2= lineCourier.substr(lineCourier.find("location:"), lineCourier.length());
+			//lineCourier = part1 + "ok " + part2;
+			lineCourier = part1 + "ok " + "location: " + tempAddress;
 			_getch();
 		}
 		tempF.open("tempF3.txt", ios::out | ios::app | ios::in | ios::binary);
@@ -825,23 +860,37 @@ void Order::startSimulation() {
 	readCourier.close();
 	readCourier.open("courier.txt");
 
-	//courier bir dahakine atlar yani setOrder() çaðrýlarak
 	readOrder.close();
 	readCourier.close();
+
+	//courier bir dahakine atlar yani setOrder() çaðrýlarak
+	remove("orders.txt");
+	rename("tempFile3.txt", "orders.txt");
+	remove("courier.txt");
+	rename("tempF3.txt", "courier.txt");
+	setOrder(newDeliveryTime);
+	remove("orders.txt");
+	rename("tempFile2.txt", "orders.txt");
+	remove("courier.txt");
+	rename("tempF2.txt", "courier.txt");
 	readOrder.close();
-	//setOrder();
+	
 }
 
-void Order::setOrder() {
+void Order::setOrder(string deliveryTimeBegin) {
 
+	MyTimes tempTime;
+	if (deliveryTimeBegin=="ok") {
+		deliveryTimeBegin = tempTime.getCurrentHour();
+	}
 	ifstream readOrder("orders.txt");
-	 
-	readOrder.close();
-	readOrder.open("orders.txt"); 
 
-	ifstream readCourier("courier.txt"); 
+	readOrder.close();
+	readOrder.open("orders.txt");
+
+	ifstream readCourier("courier.txt");
 	readCourier.close();
-	readCourier.open("courier.txt"); 
+	readCourier.open("courier.txt");
 
 	ofstream tempFile("tempFile2.txt");
 	tempFile.open("tempFile2.txt", ios::out | ios::app | ios::in | ios::binary);
@@ -853,14 +902,14 @@ void Order::setOrder() {
 	tempF << "";
 	tempF.close();
 
-	MyTimes tempTime;
+
 
 	string lineOrder, lineCourier;
-	
 
-	//ayrtýþtýr
 	string tempCno, tempClocation;
 	int buffer = 0;
+
+	//courier'a order atanýyor
 	while (getline(readCourier, lineCourier)) {
 		//cout << lineCourier << endl;
 		string Cno = lineCourier.substr(lineCourier.find("no:") + 4, lineCourier.find("name") - lineCourier.find("no") - 5);
@@ -869,7 +918,7 @@ void Order::setOrder() {
 		string Cname = lineCourier.substr(lineCourier.find("name:") + 6, lineCourier.find("status") - lineCourier.find("name") - 7);
 		//cout << "X" + Cno + "X" + Cstatus + "X" + Clocation + "X" + Cname + "X"<<endl;
 
-		if (Cstatus == "ok" && buffer==0) {
+		if (Cstatus == "ok" && buffer == 0) {
 			Cstatus = "busy";
 			/*readCourier.close();
 			readCourier.open("courier.txt");
@@ -888,7 +937,8 @@ void Order::setOrder() {
 	readCourier.close();
 	readCourier.open("courier.txt");
 
-	if (buffer==1) {
+	//courier'a order atandýktan sonra order güncelleniyor
+	if (buffer == 1) {
 		buffer = 0;
 		while (getline(readOrder, lineOrder)) {
 			//cout << lineOrder << endl;
@@ -902,7 +952,7 @@ void Order::setOrder() {
 				//cout << Ostatus << endl;
 				string part1 = lineOrder.substr(0, lineOrder.find("status:") - 1);
 				string part2 = part1 + " status: online" + " courierNo: " + tempCno + " location: " + tempClocation +
-					" orderBegin: " + tempTime.getCurrentHour() + " orderDelivery: " + tempTime.getDeliveryTime(OAddress)
+					" orderBegin: " + deliveryTimeBegin + " orderDelivery: " + orderDelivery.newDeliveryTime(deliveryTimeBegin, OAddress)
 					+ " courierStatus: busy";
 
 				lineOrder = part2;
@@ -923,7 +973,7 @@ void Order::setOrder() {
 			tempFile.close();
 		}
 	}
-		
+
 	tempFile.close();
 	readOrder.close();
 	readCourier.close();
