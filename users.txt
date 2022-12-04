@@ -1,0 +1,5 @@
+mail: 1 password: 2 role: member birthday: 1 tel: 23 name: adsasd address: ortahisar coupon: 32
+mail: 2 password: 3 role: manager birthday: 121 tel: 3453535 name: adsasd address: akcabat coupon: 12
+mail: 111 password: 222 role: member birthday: 3424234 tel: 1 name: adsasd address: yomra coupon: 3123
+mail: 11111 password: 22 role: member birthday: 56 tel: 32444 name: adsasd address: ortahisar coupon: 34234
+mail: 33 password: 33 role: manager birthday: 343 tel: 131 name: skdfs address: arsin coupon: 13123

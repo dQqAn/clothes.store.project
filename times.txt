@@ -1,0 +1,7 @@
+location: ortahisar time: 35
+location: akcabat time: 50
+location: vakfikebir time: 90
+location: besikduzu time: 110
+location: yomra time: 55
+location: arsin time: 70
+location: arakli time: 100

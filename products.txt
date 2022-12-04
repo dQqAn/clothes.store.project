@@ -1,0 +1,7 @@
+category: Dress id: 123 name: aaaa price: 10 size: 45 color: m
+category: Tshirt id: 1233 name: asdad price: 20 size: 45 color: m
+category: Dress id: 13213 name: asdasd price: 30 size: 45 color: m
+category: Skirt id: 342 name: adasdads price: 40 size: 45 color: m
+category: Dress id: 1231 name: 1231231 price: 50 size: 45 color: m
+category: Tshirt id: 2342 name: aasdada price: 60 size: 45 color: m
+category: Shoe id: 3433 name: asdadasd price: 70 size: 45 color: m
