@@ -758,9 +758,6 @@ void Order::startSimulation() {
 	readOrder.close();
 	readOrder.open("orders.txt");
 
-	//MyTimes orderDelivery setlenir,
-	orderDelivery.setHour(to_string(tHour));
-	orderDelivery.setMinute(to_string(tMin));
 
 	//en küçük saatin orderNo'su ve Address'i alýndý
 	string tempOrderNo, tempAddress, tempDeliveryTime;
@@ -939,7 +936,7 @@ void Order::setOrder(string deliveryTimeBegin) {
 
 	//courier'a order atandýktan sonra order güncelleniyor
 	if (buffer == 1) {
-		buffer = 0;
+
 		while (getline(readOrder, lineOrder)) {
 			//cout << lineOrder << endl;
 
@@ -948,7 +945,7 @@ void Order::setOrder(string deliveryTimeBegin) {
 
 			string OAddress = lineOrder.substr(lineOrder.find("address:") + 9, lineOrder.find("status:") - lineOrder.find("address:") - 10);
 
-			if (Ostatus == "offline" && buffer == 0) {
+			if (Ostatus == "offline" && buffer == 1) {
 				//cout << Ostatus << endl;
 				string part1 = lineOrder.substr(0, lineOrder.find("status:") - 1);
 				string part2 = part1 + " status: online" + " courierNo: " + tempCno + " location: " + tempClocation +
@@ -956,7 +953,7 @@ void Order::setOrder(string deliveryTimeBegin) {
 					+ " courierStatus: busy";
 
 				lineOrder = part2;
-				buffer = 1;
+				buffer = 2;
 				_getch();
 			}
 
@@ -972,6 +969,41 @@ void Order::setOrder(string deliveryTimeBegin) {
 			tempFile << lineOrder + "\n";
 			tempFile.close();
 		}
+	}
+
+	if (buffer==1) {
+		//tempCno
+		readCourier.close();
+		tempF.close();
+
+		remove("tempF2.txt");
+		tempF.open("tempF2.txt", ios::out | ios::app | ios::in | ios::binary);
+		tempF << "";
+		tempF.close();
+
+		readCourier.open("courier.txt");
+
+		while (getline(readCourier, lineCourier)) {
+			//cout << lineCourier << endl;
+			string Cno = lineCourier.substr(lineCourier.find("no:") + 4, lineCourier.find("name") - lineCourier.find("no") - 5);
+			string Cstatus = lineCourier.substr(lineCourier.find("status:") + 8, lineCourier.find("location") - lineCourier.find("status") - 9);
+			string Clocation = lineCourier.substr(lineCourier.find("location:") + 10, lineCourier.length());
+			string Cname = lineCourier.substr(lineCourier.find("name:") + 6, lineCourier.find("status") - lineCourier.find("name") - 7);
+			//cout << "X" + Cno + "X" + Cstatus + "X" + Clocation + "X" + Cname + "X"<<endl;
+
+			if (Cstatus == "busy" && tempCno==Cno && buffer == 1) {
+				Cstatus = "ok";
+				 
+				buffer = 0;
+				_getch();
+			}
+
+			tempF.open("tempF2.txt", ios::out | ios::app | ios::in | ios::binary);
+			tempF << "no: " + Cno + " name: " + Cname + " status: " + Cstatus + " location: " + Clocation + "\n";
+			tempF.close();
+
+		}
+		readCourier.close();
 	}
 
 	tempFile.close();
