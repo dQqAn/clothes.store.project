@@ -461,9 +461,9 @@ ControlFile:
 				string part2 = line.substr(line.find("role:"), line.length());
 				line = part1 + " " + newPassword + " " + part2;
 				user->setPassword(newPassword);
-				cout << line << endl;
+				//cout << line << endl;
 			}
-			cout << user->getPassword() << endl;
+			//cout << user->getPassword() << endl;
 			tempFile.open("tempFile.txt", ios::out | ios::app | ios::in | ios::binary);
 			tempFile << line + "\n";
 			tempFile.close();
