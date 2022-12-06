@@ -1028,6 +1028,61 @@ void Order::buyItems(User* user, list<list<string>>* items, Member* member) {
 	cin >> ShipControl;
 	cout << endl;
 
+	ifstream readCoupons("coupons.txt");
+	ofstream writeCoupons;
+	
+	string lineCoupons;
+	readCoupons.close();
+	readCoupons.open("coupons.txt");
+
+	bool couponControl = false;
+	string tempMail;
+	while (getline(readCoupons, lineCoupons)) {
+				
+		string userMail = lineCoupons.substr(lineCoupons.find("mail:") + 6,
+			lineCoupons.find("coupon") - lineCoupons.find("mail") - 7);
+
+		if (user->getMail()== userMail) {
+			
+			string tempCoupon = lineCoupons.substr(lineCoupons.find("coupon:") + 8,
+				lineCoupons.length());
+			tempMail = userMail;
+			couponControl = true;
+		}
+	}
+	readCoupons.close();
+
+	if (couponControl==true) {
+
+		ofstream tempCoupon;
+		tempCoupon.close();
+		tempCoupon.open("tempCoupon.txt", ios::out | ios::app | ios::in | ios::binary);
+		tempCoupon << "";
+		tempCoupon.close();
+		
+		readCoupons.open("coupons.txt");
+		while (getline(readCoupons, lineCoupons)) {
+			/*cout << "X" << user->getMail() << "X" << endl;
+			cout << "X" << tempMail << "X" << endl;*/
+
+			string userMail = lineCoupons.substr(lineCoupons.find("mail:") + 6,
+				lineCoupons.find("coupon") - lineCoupons.find("mail") - 7);
+
+			if (userMail != tempMail) {
+				
+				//cout << lineCoupons << endl;
+				tempCoupon.open("tempCoupon.txt", ios::out | ios::app | ios::in | ios::binary);
+				tempCoupon << lineCoupons + "\n";				
+				tempCoupon.close();
+			}
+			
+		}
+		readCoupons.close();
+		tempCoupon.close();
+		remove("coupons.txt");
+		rename("tempCoupon.txt", "coupons.txt");
+	}
+		
 	string line;
 	int counter = 1;
 
@@ -1049,9 +1104,10 @@ void Order::buyItems(User* user, list<list<string>>* items, Member* member) {
 					cout << tempPrice << endl;
 				}*/
 				tempPrice += stoi(*single_it);
+				if (couponControl == true) { tempPrice /= 2; }
 				//cout << tempPrice << endl;
 			}
-		}
+		}		
 
 		readOrders.close();
 		readOrders.open("orders.txt");
