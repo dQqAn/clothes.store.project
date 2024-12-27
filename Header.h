@@ -60,7 +60,9 @@ public:
 	void setHour(string);
 	void setMinute(string);
 
-	string calculateTime(string first, string second);
+	string calculateTime(string time, string min);
+
+	string newDeliveryTime(string time, string address);
 	
 private:
 	string hour;
@@ -74,7 +76,7 @@ class Member:public User{
 public:
 	Member(string mail, string password, string role, string birthday, string tel, string name, string adress, string coupon);
 	void showProducts(string pName);
-	void showOrders();
+	void showOrders(User *user);
 	void writeComment(string mail);
 	void changePassword(User *user);
 	void addItemToCart(list<list<string>> *items);
@@ -151,7 +153,7 @@ class Order {
 public:
 	Order();
 	void buyItems(User* user, list<list<string>>* items, Member* member);
-	void setOrder();
+	void setOrder(string deliveryTimeBegin);
 
 	void startSimulation();
 private:
